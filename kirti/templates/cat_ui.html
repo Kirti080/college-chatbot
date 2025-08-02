@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>my AI Assistant</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: url('/static/logo.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      height: 200vh;
+      overflow: hidden;
+    }
+
+    .overlay {
+      background-color: rgb(255, 255, 255);
+      width: 200%;
+      height: 200%;
+      position: absolute;
+      z-index: 0;
+      top: 0;
+      left: 0;
+    }
+
+
+    .container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      text-align: center;
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #ffcc00;
+      text-shadow: 2px 2px #000;
+    }
+
+    .cat-img {
+      width: 400px;
+      height: 400px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto; /* ⬅️ Center horizontally */
+    }
+    
+
+    #text-box {
+      margin-top: 20px;
+      /* background: rgba(255, 255, 255, 0.15); */
+      background: rgba(255, 255, 0);
+      color: black;
+      font-size: 22px;
+      padding: 15px 25px;
+      border-radius: 15px;
+      display: inline-block;
+      min-height: 60px;
+      white-space: pre-wrap;
+      text-align: left;
+      font-family: monospace;
+      box-shadow: 0 0 10px #fff3;
+      backdrop-filter: blur(6px);
+      transition: all 0.5s ease-in-out;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      #text-box {
+        font-size: 16px;
+        padding: 10px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <div class="container">
+    <h1>Desh Bhagat University</h1>
+    <img id="cat-image" class="cat-img" src="/static/janvi.png" alt="janvi.gif">
+    <div id="text-box">Say something...</div>
+  </div>
+
+  <script>
+    let lastText = "Say something...";
+    const textBox = document.getElementById("text-box");
+    const catImage = document.getElementById("cat-image");
+
+    function startTalking() {
+      catImage.src = "/static/janvi.gif";
+    }
+
+    function stopTalking() {
+      catImage.src = "/static/janvi.png";
+    }
+
+    function typeText(text, speed = 50) {
+      textBox.innerText = "";
+      let i = 0;
+      const interval = setInterval(() => {
+        textBox.innerText += text.charAt(i);
+        i++;
+        if (i >= text.length) {
+          clearInterval(interval);
+          stopTalking();
+        }
+      }, speed);
+    }
+
+    async function speakText(text) {
+      console.log("🗣️ Speaking:", text);
+      startTalking();
+      typeText(text);
+    }
+    
+
+    setInterval(async () => {
+      try {
+        const res = await fetch("http://localhost:5005/get-latest");
+        const data = await res.json();
+
+        if (data.text && data.text !== lastText) {
+          lastText = data.text;
+          speakText(data.text);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching latest text:", err);
+      }
+    }, 2000);
+  </script>
+</body>
+</html>
